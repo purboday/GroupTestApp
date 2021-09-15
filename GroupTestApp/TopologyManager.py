@@ -35,6 +35,9 @@ class TopologyManager(Component):
         else:
             self.logger.info('sending group update message')
             self.groupUpdate.send_pyobj('start')
+#             self.trigger.setDelay(120.0)
+#             self.cmdFlag = False
+#             self.trigger.launch()
 # riaps:keep_trigger:end
 
 # riaps:keep_impl:begin

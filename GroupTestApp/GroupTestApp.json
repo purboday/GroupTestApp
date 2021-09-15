@@ -11,6 +11,10 @@
                     "name":"Ts"
                 },
                 {
+                    "default":"eth1",
+                    "name":"iface"
+                },
+                {
                     "default":"grp_0",
                     "name":"send_grp"
                 },
@@ -25,6 +29,10 @@
                         {
                             "name":"Ts",
                             "param":"Ts"
+                        },
+                        {
+                            "name":"iface",
+                            "param":"iface"
                         },
                         {
                             "name":"send_grp",
@@ -90,6 +98,10 @@
                     "name":"Ts"
                 },
                 {
+                    "default":"eth1",
+                    "name":"iface"
+                },
+                {
                     "default":"grp_0",
                     "name":"send_grp"
                 },
@@ -115,6 +127,18 @@
                 "reqs":{},
                 "srvs":{},
                 "subs":{
+                    "discoverPeers":{
+                        "deadline":0,
+                        "index":5,
+                        "timed":false,
+                        "type":"PeerDiscoveryData"
+                    },
+                    "groupUpdate":{
+                        "deadline":0,
+                        "index":6,
+                        "timed":false,
+                        "type":"GroupUpdateData"
+                    },
                     "nodeReady":{
                         "deadline":0,
                         "index":2,
@@ -220,7 +244,7 @@
             "timed":false
         },
         {
-            "kind":"default",
+            "kind":"leader",
             "message":"TopLinkLeaderGrpMsg",
             "name":"TopLinkLeaderGrp",
             "timed":false
