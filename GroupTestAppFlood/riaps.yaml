@@ -1,0 +1,14 @@
+!!python/object:riaps.utils.appdesc.AppDescriptor
+home: /home/riaps/GroupTestApp/GroupTestAppFlood
+host: '3232250113'
+hosts:
+- 192.168.57.1
+- 192.168.57.4
+- 192.168.57.2
+- 192.168.57.3
+- 192.168.57.5
+- 192.168.57.6
+mac: 42d0df72bcbe
+network: {}
+sha: 42d0df72bcbe
+url: file:////home/riaps/GroupTestApp/GroupTestAppFlood

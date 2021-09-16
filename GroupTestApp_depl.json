@@ -1,0 +1,135 @@
+{
+  "GroupTestApp": [
+    {
+      "target": [
+        "192.168.57.1"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "10.0"
+            },
+            {
+              "name": "iface",
+              "value": "h1-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.2"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "20.0"
+            },
+            {
+              "name": "iface",
+              "value": "h2-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.3"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "5.0"
+            },
+            {
+              "name": "iface",
+              "value": "h3-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.4"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "15.0"
+            },
+            {
+              "name": "iface",
+              "value": "h4-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.5"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "5.0"
+            },
+            {
+              "name": "iface",
+              "value": "h5-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.6"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "5.0"
+            },
+            {
+              "name": "iface",
+              "value": "h6-eth0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "192.168.57.1"
+      ],
+      "actors": [
+        {
+          "name": "TopologyManager",
+          "actuals": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+app GroupTestApp {
+	on (192.168.57.1) Averager(value=5.0);
+	on (192.168.57.2) Averager(value=0.0);
+	on (192.168.57.3) Averager(value=0.0);
+	on (192.168.57.4) Averager(value=0.0);
+	on (192.168.57.5) Averager(value=0.0);
+	on (192.168.57.6) Averager(value=0.0);
+	on (192.168.57.1) TopologyManager;
+}

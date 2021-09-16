@@ -14,6 +14,16 @@ class Averager(Component):
 # riaps:keep_constr:begin
     def __init__(self, Ts, iface, send_grp, recv_grp):
         super(Averager, self).__init__()
+        self.Ts = Ts
+        self.uuid = uuid.uuid4().int
+        self.pid = os.getpid()
+        self.dataValues = { }
+        self.sensorTime = 0.0
+        self.sensorValue = 0.0
+        self.ownValue = 0.0
+        self.sensorUpdate = False
+        self.logger.info("%s - starting" % str(self.pid))
+        self.bcast = 0
 # riaps:keep_constr:end
 # riaps:keep_toplinkmgrinit:begin
         self.joined = {}
@@ -57,17 +67,36 @@ class Averager(Component):
 
 # riaps:keep_sensorready:begin
     def on_sensorReady(self):
-        pass
+        msg = self.sensorReady.recv_pyobj() # Receive (timestamp,value)
+        self.logger.info("on_sensorReady():%s" % str(msg[1]))
+        self.sensorTime, self.sensorValue = msg
+        self.sensorUpdate = True
 # riaps:keep_sensorready:end
 
 # riaps:keep_display:begin
     def on_display(self):
         now = self.display.recv_pyobj()
+        self.logger.info('broadcast: %d, curr_val: %f' %(self.bcast, self.ownValue))
 # riaps:keep_display:end
 
 # riaps:keep_update:begin
     def on_update(self):
         now = self.update.recv_pyobj()
+        self.bcast += 1
+        # self.logger.info("on_update():%s",str(msg))
+        if self.sensorUpdate:
+            self.ownValue = self.sensorValue
+            self.sensorUpdate = False
+        if len(self.dataValues) != 0:
+            sum = 0.0
+            for value in self.dataValues.values():
+                sum += (self.ownValue - value)
+            der = sum / self.Ts
+            self.ownValue -= der
+        now = time.time()
+        msg = (self.uuid,now,self.ownValue)
+        for grp in self.recv_grp:
+            self.joined[grp].send_pyobj(('app',msg)) 
 # riaps:keep_update:end
 
 # riaps:keep_impl:begin
@@ -218,8 +247,10 @@ class Averager(Component):
                 self.joined[self.send_grp[0]].send_pyobj(('group_update', content))
                 
 
-    def appAlgorithm(self):
-        pass
+    def appAlgorithm(self, content):
+        otherId,otherTimestamp,otherValue = content
+        if otherId != self.uuid:
+            self.dataValues[otherId] = otherValue
     
     def handleGroupMessage(self, _group):
         msg = _group.recv_pyobj()
@@ -238,7 +269,7 @@ class Averager(Component):
         if _group in self.recv_grp:
             type, content = msg
             if type == 'app':
-                self.appAlgorithm()
+                self.appAlgorithm(content)
             if type == 'group_update':
                 self.handleUpdate(content)
             if type == 'grp_qry':
@@ -298,7 +329,7 @@ class Averager(Component):
                     self.GrpAns={}
             else:
                 delKeys = []
-                for grp, cont in GrpAns.items():
+                for grp, cont in self.GrpAns.items():
                     if any(item['rep'] != '' for item in cont):
                         delKeys.append(grp)
                 for key in delKeys:

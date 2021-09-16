@@ -17,7 +17,7 @@ class Sensor(Component):
         else:
             self.myValue = value
 # riaps:keep_constr:end
-    
+	
 
 
 
