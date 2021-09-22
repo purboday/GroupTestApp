@@ -28,6 +28,8 @@ class Averager(Component):
         self.logger.info("%s - starting" % str(self.pid))
         self.bcast = 0
         self.ready = False
+        self.netStats = []
+        self.otherId = []
 # riaps:keep_constr:end
 # riaps:keep_toplinkmgrinit:begin
         self.joined = {}
@@ -84,8 +86,9 @@ class Averager(Component):
     def on_display(self):
         now = self.display.recv_pyobj()
         if self.ready:
-            self.logger.info('broadcast: %d, curr_val: %f' %(self.bcast, self.ownValue))
-            self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue})
+            rel = len(self.otherId)/6
+            self.logger.info('broadcast: %d, curr_val: %f, rel: %f' %(self.bcast, self.ownValue, rel))
+            self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue, 'rel': rel})
 # riaps:keep_display:end
 
 # riaps:keep_display:begin
@@ -106,6 +109,7 @@ class Averager(Component):
             if self.sensorUpdate:
                 self.ownValue = self.sensorValue
                 self.sensorUpdate = False
+                self.otherId=[]
             if len(self.dataValues) != 0:
                 sum = 0.0
                 for value in self.dataValues.values():
@@ -113,7 +117,7 @@ class Averager(Component):
                 der = sum / self.Ts
                 self.ownValue -= der
             now = time.time()
-            msg = (self.uuid,now,self.ownValue)
+            msg = (self.uuid,self.otherId,now,self.ownValue)
             for grp in self.send_grp:
                 self.joined[grp].send_pyobj(('app',msg))
 # riaps:keep_update:end
@@ -135,6 +139,7 @@ class Averager(Component):
     def sendInfo(self, content):
         for gname in self.recv_grp:
             self.logger.info('sending to %s' %(gname))
+            content['grp']=gname
             self.joined[gname].send_pyobj(('toplink',content))
             
     def handleTopo(self, content):
@@ -270,9 +275,14 @@ class Averager(Component):
                 
 
     def appAlgorithm(self, content):
-        otherId,otherTimestamp,otherValue = content
+        otherId,otherRoute,otherTimestamp,otherValue = content
         if otherId != self.uuid:
             self.dataValues[otherId] = otherValue
+            if otherId not in self.otherId:
+                    self.otherId.append(otherId)
+            for nodeId in otherRoute:
+                if nodeId not in self.otherId:
+                    self.otherId.append(nodeId)
     
     def handleGroupMessage(self, _group):
         msg = _group.recv_pyobj()

@@ -16,5 +16,5 @@ on (10.42.0.123) Averager(value = 5.0,Ts = 100.0,send_grp = "grp3",recv_grp = "g
 
 on (10.42.0.118) TopologyManager ;
 
-on (10.42.0.113) DataLogger(filename='/home/riaps/GTAlgo.csv');
+on (10.42.0.113) DataLogger(filename='/home/riaps/GTAlgoFT.csv');
 }

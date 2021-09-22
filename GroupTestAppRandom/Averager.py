@@ -29,21 +29,26 @@ class Averager(Component):
         self.id = None
         self.ip = None
         self.iface = iface
-        self.ipList = ['192.168.57.1','192.168.57.2','192.168.57.3','192.168.57.4','192.168.57.5','192.168.57.6']
-        self.currNbr = []
+        self.ipList = ['10.42.0.116','10.42.0.118','10.42.0.119','10.42.0.120','10.42.0.121','10.42.0.123']
+        self.currNbr = self.shuffleNbr(self.ipList,4)
         self.msgCount = 0
         self.bcast = 0
+        self.netStats = []
+        self.ageList = {nbr : 0 for nbr in self.currNbr}
+        self.currView = self.shuffleNbr(self.currNbr,4)
+        self.waiting = ''
+        self.otherId = []
         
-    # riaps:keep_handleactivate:begin
+# riaps:keep_handleactivate:begin
     def handleActivate(self):
         self.id = self.getUUID()
         self.ip = netifaces.ifaddresses(self.iface)[netifaces.AF_INET][0]['addr']
         self.logger.info("[%s:%s]" %(self.ip, self.id))
 # riaps:keep_handleactivate:end
 
-    def shuffleNbr(self):
-        temp_list = [ip for ip in self.ipList if ip !=self.ip]
-        sampledList=random.sample(temp_list,3)
+    def shuffleNbr(self,sourceList,count):
+        temp_list = [ip for ip in sourceList if ip !=self.ip]
+        sampledList=random.sample(temp_list,count)
         return sampledList
 
     def on_sensorReady(self):
@@ -55,11 +60,21 @@ class Averager(Component):
     def on_nodeReady(self):
         msg = self.nodeReady.recv_pyobj()  # Receive (actorID,timestamp,value)
         # self.logger.info("on_otherReady():%s",str(msg[2]))
-        otherId,otherTimestamp,otherIP,otherValue = msg
+        otherId,otherRoute,otherTimestamp,otherIP,otherValue = msg
         if otherId != self.uuid:
-            if otherIP in self.currNbr:
+            if otherIP in self.currView:
                 self.dataValues[otherId] = otherValue
                 self.msgCount += 1
+                if otherIP in self.ageList:
+                    self.ageList[otherIP] += 1
+                else:
+                    self.ageList[otherIP] = 1
+                if otherId not in self.otherId:
+                    self.otherId.append(otherId)
+                for nodeId in otherRoute:
+                    if nodeId not in self.otherId:
+                        self.otherId.append(nodeId)
+            
     
     def on_update(self):
         msg = self.update.recv_pyobj()      # Receive timestamp 
@@ -67,6 +82,7 @@ class Averager(Component):
         if self.sensorUpdate:
             self.ownValue = self.sensorValue
             self.sensorUpdate = False
+            self.otherId=[]
         if len(self.dataValues) != 0:
             sum = 0.0
             for value in self.dataValues.values():
@@ -75,15 +91,81 @@ class Averager(Component):
             self.ownValue -= der
         now = time.time()
         self.bcast += 1
-        self.currNbr = self.shuffleNbr()
-        msg = (self.uuid,now,self.ip,self.ownValue)
-        self.thisReady.send_pyobj(msg)        
+        msg = (self.uuid, self.otherId,now,self.ip,self.ownValue)
+        self.thisReady.send_pyobj(msg)
+        self.currView = self.shuffleNbr(self.currNbr, 3)        
 
     def on_display(self):
         msg = self.display.recv_pyobj()
-        self.logger.info('broadcast: %d, curr_val: %f' %(self.bcast, self.ownValue))
+        rel = len(self.otherId)/len(self.ipList)
+        self.logger.info('broadcast: %d, curr_val: %f, rel: %f' %(self.bcast, self.ownValue, rel))
+        self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue, 'rel': rel})
         
-    
+    def on_shuffle(self):
+        now = self.shuffle.recv_pyobj()
+        if self.waiting != '':
+            self.logger.info('suspected failure of %s' %(self.waiting))
+            sourceList = [ip for ip in self.ipList if ip != self.waiting]
+            self.currNbr = self.shuffleNbr(sourceList,4)
+            temp_ageList = {}
+            for ip in self.currNbr:
+                if ip in self.ageList:
+                    temp_ageList[ip]=self.ageList[ip]
+                else:
+                    temp_ageList[ip]=0
+            self.ageList=temp_ageList
+            
+        for ip, age in self.ageList.items():
+            self.ageList[ip] += 1
+        candt=list(self.ageList.keys())[0]
+        for ip, age in self.ageList.items():    
+            if age < self.ageList[candt]:
+                candt = ip
+        sample = self.currView + [self.ip]
+        self.shuffleReq.send_pyobj(('req',candt,sample))
+        self.waiting=candt
+        
+    def on_shuffleRep(self):
+        msg = self.shuffleRep.recv_pyobj()
+        type, dst, sample = msg
+        if dst == self.ip:
+            sourceList = self.currNbr+sample
+            self.currNbr=self.shuffleNbr(sourceList, 4)
+            temp_ageList = {}
+            for ip in self.currNbr:
+                if ip in self.ageList:
+                    temp_ageList[ip]=self.ageList[ip]
+                else:
+                    temp_ageList[ip]=0
+            self.ageList=temp_ageList
+            if type == 'req':
+                candt=list(self.ageList.keys())[0]
+                for ip, age in self.ageList.items():    
+                    if age < self.ageList[candt]:
+                        candt = ip
+                sample = self.currView + [self.ip]
+                self.shuffleReq.send_pyobj(('rep',candt,sample))
+            if type == 'rep':
+                if dst == self.waiting:
+                    self.waiting = ''
+                
+        
+        
+# riaps:keep_display:begin
+    def on_logUpdate(self):
+        now = self.logUpdate.recv_pyobj()
+        self.logger.info('sending logging data')
+        self.sendLog.send_pyobj(self.netStats)
+        self.netStats=[]
+# riaps:keep_display:end
+        
+    def on_discoverPeers(self):
+        sig = self.discoverPeers.recv_pyobj()
+        self.logger.info('on discover peers')
+        
+    def on_groupUpdate(self):
+        sig = self.groupUpdate.recv_pyobj()
+        self.logger.info('on group update')
         
     def handlePeerStateChange(self,state,uuid):
         self.logger.info("peer %s is %s" % (uuid,state))

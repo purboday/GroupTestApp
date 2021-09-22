@@ -317,10 +317,6 @@
                     "groupUpdate":{
                         "timed":false,
                         "type":"GroupUpdateData"
-                    },
-                    "sendLog":{
-                        "timed":false,
-                        "type":"LogData"
                     }
                 },
                 "qrys":{},

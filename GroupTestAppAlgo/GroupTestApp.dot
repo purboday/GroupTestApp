@@ -45,7 +45,6 @@ PeerDiscoveryData -> averager_Averager_47;
 GroupUpdateData -> averager_Averager_47;
 topmgr_TopologyManager_49 -> GroupUpdateData;
 topmgr_TopologyManager_49 -> PeerDiscoveryData;
-topmgr_TopologyManager_49 -> LogData;
 subgraph "cluster_10.42.0.118" {
 label="10.42.0.118";
 rankdir=BT;

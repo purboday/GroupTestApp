@@ -39,7 +39,6 @@ component TopologyManager{
 	timer trigger;
 	pub groupUpdate : GroupUpdateData;
 	pub discoverPeers : PeerDiscoveryData;
-	pub sendLog : LogData ;
 }
 
 device DataWriter(filename='LogData.csv', iface = 'eth1') {

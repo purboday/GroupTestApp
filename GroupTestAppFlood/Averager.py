@@ -4,6 +4,7 @@ import logging
 import uuid
 import time
 import os
+import netifaces
 
 # Averager algorithm
 # Continuous time update equation (for node i)
@@ -26,6 +27,16 @@ class Averager(Component):
         self.bcast = 0
         self.msgCount = 0
         self.iface = iface
+        self.netStats = []
+        self.id = ''
+        self.ip = ''
+        
+# riaps:keep_handleactivate:begin
+    def handleActivate(self):
+        self.id = self.getUUID()
+        self.ip = netifaces.ifaddresses(self.iface)[netifaces.AF_INET][0]['addr']
+        self.logger.info("[%s:%s]" %(self.ip, self.id))
+# riaps:keep_handleactivate:end
 
     def on_sensorReady(self):
         msg = self.sensorReady.recv_pyobj() # Receive (timestamp,value)
@@ -35,7 +46,7 @@ class Averager(Component):
 
     def on_nodeReady(self):
         msg = self.nodeReady.recv_pyobj()  # Receive (actorID,timestamp,value)
-        self.logger.info("on_otherReady():%s"%(str(msg[2])))
+        #self.logger.info("on_otherReady():%s"%(str(msg[2])))
         otherId,otherTimestamp,otherValue = msg
         if otherId != self.uuid:
             self.dataValues[otherId] = otherValue
@@ -56,11 +67,20 @@ class Averager(Component):
         now = time.time()
         self.bcast += 1
         msg = (self.uuid,now,self.ownValue)
-        self.thisReady.send_pyobj(msg)        
+        self.thisReady.send_pyobj(msg)       
 
     def on_display(self):
         msg = self.display.recv_pyobj()
         self.logger.info('broadcast: %d, curr_val: %f' %(self.bcast, self.ownValue))
+        self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue})
+        
+# riaps:keep_display:begin
+    def on_logUpdate(self):
+        now = self.logUpdate.recv_pyobj()
+        self.logger.info('sending logging data')
+        self.sendLog.send_pyobj(self.netStats)
+        self.netStats=[]
+# riaps:keep_display:end
         
     def on_discoverPeers(self):
         sig = self.discoverPeers.recv_pyobj()

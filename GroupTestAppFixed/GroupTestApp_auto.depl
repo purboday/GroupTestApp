@@ -2,18 +2,19 @@
 
 app GroupTestApp {
 
-on (10.42.0.116) Averager(value = 0.0,Ts = 100.0,send_grp = "grp1",recv_grp = "grp0") ;
+on (10.42.0.116) Averager(value = 10.0,Ts = 100.0,send_grp = "grp1",recv_grp = "grp0") ;
 
-on (10.42.0.118) Averager(value = 0.0,Ts = 100.0,send_grp = "grp0",recv_grp = "grp5") ;
+on (10.42.0.118) Averager(value = 15.0,Ts = 100.0,send_grp = "grp0",recv_grp = "grp5") ;
 
-on (10.42.0.119) Averager(value = 0.0,Ts = 100.0,send_grp = "grp2",recv_grp = "grp1,grp4") ;
+on (10.42.0.119) Averager(value = 5.0,Ts = 100.0,send_grp = "grp2",recv_grp = "grp1,grp4") ;
 
-on (10.42.0.120) Averager(value = 0.0,Ts = 100.0,send_grp = "grp4",recv_grp = "grp1,grp3,grp5") ;
+on (10.42.0.120) Averager(value = 15.0,Ts = 100.0,send_grp = "grp4",recv_grp = "grp1,grp3,grp5") ;
 
-on (10.42.0.121) Averager(value = 0.0,Ts = 100.0,send_grp = "grp5",recv_grp = "grp1,grp2") ;
+on (10.42.0.121) Averager(value = 5.0,Ts = 100.0,send_grp = "grp5",recv_grp = "grp1,grp2") ;
 
-on (10.42.0.123) Averager(value = 0.0,Ts = 100.0,send_grp = "grp3",recv_grp = "grp2") ;
+on (10.42.0.123) Averager(value = 5.0,Ts = 100.0,send_grp = "grp3",recv_grp = "grp2") ;
 
 on (10.42.0.118) TopologyManager ;
+on (10.42.0.113) DataLogger(filename='/home/riaps/GTFixedFT.csv');
 
-}
+} 

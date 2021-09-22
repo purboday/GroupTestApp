@@ -5,6 +5,9 @@ app GroupTestApp {
     message NodeData;
     message GroupUpdateData;
     message PeerDiscoveryData;
+    message LogData;
+	message LogDataInternal;
+	message ShuffleData;
 
 	// Sensor component
     component Sensor(value=1.0) {
@@ -13,12 +16,19 @@ app GroupTestApp {
     }
     
     // Averager component
-component Averager(Ts=1.0){
+component Averager(Ts=1.0,iface='eth1'){
       sub sensorReady : SensorData ;	// Subscriber port to trigger component with SensorData messages
       pub thisReady : NodeData;			// Publish port to publish node value update messages
       sub nodeReady : NodeData;			// Subscriber port for node value update messages
-      timer update 1000;					// 
+      timer update 10;					// 
       timer display 1000;
+      sub groupUpdate : GroupUpdateData ;
+      sub discoverPeers : PeerDiscoveryData;
+      timer logUpdate 60 sec;
+      pub sendLog : LogData;
+      timer shuffle 10 sec;
+      pub shuffleReq : ShuffleData;
+      sub shuffleRep : ShuffleData;
     }
     
     // TopologyManager Component
@@ -28,8 +38,17 @@ component TopologyManager{
 	pub discoverPeers : PeerDiscoveryData;
 }
 
+device DataWriter(filename='LogData.csv', iface = 'eth1') {
+	sub writeLog : LogDataInternal ;
+}	
+component Logger(iface = 'eth1') {
+	sub getLog : LogData;
+	timer update 60 sec;
+	pub writeLog : LogDataInternal ;
+}
+
     // Averager actor
-actor Averager(value=0.0,Ts=100.0){
+actor Averager(value=0.0,Ts=100.0,iface='eth1'){
        local SensorData;					// Local message types
        { 
           sensor : Sensor(value=value);		
@@ -44,4 +63,12 @@ actor TopologyManager{
 		topmgr : TopologyManager;
 	}
 }
+
+actor DataLogger(filename='LogData.csv', iface='eth1') {
+    	local LogDataInternal;
+    	{
+    		logger : Logger(iface = iface) ;
+    		writer : DataWriter(filename = filename, iface = iface) ;
+    	}
+    }
 }

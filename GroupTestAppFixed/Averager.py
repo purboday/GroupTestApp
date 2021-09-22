@@ -6,6 +6,8 @@ import grouptestapp_capnp
 import time
 import netifaces
 from datetime import datetime
+import uuid
+import os
 
 # riaps:keep_import:end
 
@@ -28,6 +30,8 @@ class Averager(Component):
         self.iface = iface
         self.nic = 'up'
         self.bcast = 0
+        self.netStats = []
+        self.otherId = []
 # riaps:keep_constr:end
 # riaps:keep_toplinkmgrinit:begin
         self.joined = {}
@@ -51,6 +55,11 @@ class Averager(Component):
             self.logger.info('joined group %s' %(grp))
 # riaps:keep_toplinkmgrjoin:end
 
+    def curr_time(self):
+        current_time = datetime.now()
+        dt_string = current_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        return dt_string
+
 
 # riaps:keep_nodeready:begin
     def on_nodeReady(self):
@@ -68,7 +77,17 @@ class Averager(Component):
 # riaps:keep_display:begin
     def on_display(self):
         now = self.display.recv_pyobj()
-        self.logger.info('broadcast: %d, curr_val: %f' %(self.bcast, self.ownValue))
+        rel = len(self.otherId)/6
+        self.logger.info('broadcast: %d, curr_val: %f, rel: %f' %(self.bcast, self.ownValue, rel))
+        self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue, 'rel': rel})
+# riaps:keep_display:end
+
+# riaps:keep_display:begin
+    def on_logUpdate(self):
+        now = self.logUpdate.recv_pyobj()
+        self.logger.info('sending logging data')
+        self.sendLog.send_pyobj(self.netStats)
+        self.netStats=[]
 # riaps:keep_display:end
 
 # riaps:keep_update:begin
@@ -79,6 +98,7 @@ class Averager(Component):
         if self.sensorUpdate:
             self.ownValue = self.sensorValue
             self.sensorUpdate = False
+            self.otherId=[]
         if len(self.dataValues) != 0:
             sum = 0.0
             for value in self.dataValues.values():
@@ -86,9 +106,10 @@ class Averager(Component):
             der = sum / self.Ts
             self.ownValue -= der
         now = time.time()
-        msg = (self.uuid,now,self.ownValue)
-        for grp in self.recv_grp:
-            self.joined[grp].send_pyobj(('app',msg)) 
+        msg = (self.uuid,self.otherId,now,self.ownValue)
+        for grp in self.send_grp:
+            self.joined[grp].send_pyobj(('app',msg))
+        
 # riaps:keep_update:end
 
 # riaps:keep_impl:begin
@@ -105,13 +126,18 @@ class Averager(Component):
                 
 
     def appAlgorithm(self, content):
-        otherId,otherTimestamp,otherValue = content
+        otherId,otherRoute,otherTimestamp,otherValue = content
         if otherId != self.uuid:
             self.dataValues[otherId] = otherValue
+            if otherId not in self.otherId:
+                self.otherId.append(otherId)
+            for nodeId in otherRoute:
+                if nodeId not in self.otherId:
+                    self.otherId.append(nodeId)
     
     def handleGroupMessage(self, _group):
         msg = _group.recv_pyobj()
-        self.logger.info('received msg %s from group %s' %(msg,_group.getGroupName()))
+        #self.logger.info('received msg %s from group %s' %(msg,_group.getGroupName()))
         for gname, grp in self.joined.items():
             if grp == _group:
                 _group = gname

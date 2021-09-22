@@ -70,6 +70,56 @@
                 "spc":{}
             }
         },
+        "DataLogger":{
+            "formals":[
+                {
+                    "default":"LogData.csv",
+                    "name":"filename"
+                },
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "instances":{
+                "logger":{
+                    "actuals":[
+                        {
+                            "name":"iface",
+                            "param":"iface"
+                        }
+                    ],
+                    "type":"Logger"
+                },
+                "writer":{
+                    "actuals":[
+                        {
+                            "name":"filename",
+                            "param":"filename"
+                        },
+                        {
+                            "name":"iface",
+                            "param":"iface"
+                        }
+                    ],
+                    "type":"DataWriter"
+                }
+            },
+            "internals":[],
+            "locals":[
+                {
+                    "type":"LogDataInternal"
+                }
+            ],
+            "real-time":false,
+            "scheduler":{},
+            "usage":{
+                "cpu":{},
+                "mem":{},
+                "net":{},
+                "spc":{}
+            }
+        },
         "TopologyManager":{
             "formals":[],
             "instances":{
@@ -117,6 +167,10 @@
                 "clts":{},
                 "inss":{},
                 "pubs":{
+                    "sendLog":{
+                        "timed":false,
+                        "type":"LogData"
+                    },
                     "thisReady":{
                         "timed":false,
                         "type":"NodeData"
@@ -158,10 +212,56 @@
                         "index":4,
                         "period":1000
                     },
+                    "logUpdate":{
+                        "deadline":0,
+                        "index":7,
+                        "period":60000
+                    },
                     "update":{
                         "deadline":0,
                         "index":3,
                         "period":10
+                    }
+                }
+            },
+            "scheduler":"default"
+        },
+        "Logger":{
+            "formals":[
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "language":"default",
+            "name":"Logger",
+            "ports":{
+                "anss":{},
+                "clts":{},
+                "inss":{},
+                "pubs":{
+                    "writeLog":{
+                        "timed":false,
+                        "type":"LogDataInternal"
+                    }
+                },
+                "qrys":{},
+                "reps":{},
+                "reqs":{},
+                "srvs":{},
+                "subs":{
+                    "getLog":{
+                        "deadline":0,
+                        "index":1,
+                        "timed":false,
+                        "type":"LogData"
+                    }
+                },
+                "tims":{
+                    "update":{
+                        "deadline":0,
+                        "index":2,
+                        "period":60000
                     }
                 }
             },
@@ -217,6 +317,10 @@
                     "groupUpdate":{
                         "timed":false,
                         "type":"GroupUpdateData"
+                    },
+                    "sendLog":{
+                        "timed":false,
+                        "type":"LogData"
                     }
                 },
                 "qrys":{},
@@ -235,7 +339,41 @@
             "scheduler":"default"
         }
     },
-    "devices":{},
+    "devices":{
+        "DataWriter":{
+            "formals":[
+                {
+                    "default":"LogData.csv",
+                    "name":"filename"
+                },
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "language":"default",
+            "name":"DataWriter",
+            "ports":{
+                "anss":{},
+                "clts":{},
+                "inss":{},
+                "pubs":{},
+                "qrys":{},
+                "reps":{},
+                "reqs":{},
+                "srvs":{},
+                "subs":{
+                    "writeLog":{
+                        "deadline":0,
+                        "index":1,
+                        "timed":false,
+                        "type":"LogDataInternal"
+                    }
+                },
+                "tims":{}
+            }
+        }
+    },
     "groups":[
         {
             "kind":"leader",
@@ -263,6 +401,12 @@
         },
         {
             "name":"PeerDiscoveryData"
+        },
+        {
+            "name":"LogData"
+        },
+        {
+            "name":"LogDataInternal"
         },
         {
             "name":"TopLinkGrpMsg"

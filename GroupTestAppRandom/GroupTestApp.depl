@@ -1,13 +1,15 @@
 app GroupTestApp {
-	on (10.42.0.111) Averager(value=5.0);
-	on (10.42.0.112) Averager(value=0.0);
-	on (10.42.0.113) Averager(value=0.0);
-	on (10.42.0.114) Averager(value=0.0);
-	on (10.42.0.116) Averager(value=0.0);
-	on (10.42.0.118) Averager(value=0.0);
-	on (10.42.0.119) Averager(value=0.0);
-	on (10.42.0.120) Averager(value=0.0);
-	on (10.42.0.121) Averager(value=0.0);
-	on (10.42.0.122) Averager(value=0.0);
-	on (10.42.0.123) Averager(value=0.0);
+//	on (10.42.0.111) Averager(value=5.0);
+//	on (10.42.0.112) Averager(value=0.0);
+//	on (10.42.0.113) Averager(value=0.0);
+//	on (10.42.0.114) Averager(value=0.0);
+	on (10.42.0.116) Averager(value=10.0);
+	on (10.42.0.118) Averager(value=15.0);
+	on (10.42.0.119) Averager(value=5.0);
+	on (10.42.0.120) Averager(value=15.0);
+	on (10.42.0.121) Averager(value=5.0);
+	//on (10.42.0.122) Averager(value=0.0);
+	on (10.42.0.123) Averager(value=5.0);
+	on (10.42.0.116) TopologyManager;
+	on (10.42.0.113) DataLogger(filename='/home/riaps/GTRandomFT.csv');
 }

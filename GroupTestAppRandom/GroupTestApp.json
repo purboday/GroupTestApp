@@ -21,10 +21,6 @@
                         {
                             "name":"Ts",
                             "param":"Ts"
-                        },
-                        {
-                            "name":"iface",
-                            "param":"iface"
                         }
                     ],
                     "type":"Averager"
@@ -147,6 +143,10 @@
                         "timed":false,
                         "type":"LogData"
                     },
+                    "shuffleReq":{
+                        "timed":false,
+                        "type":"ShuffleData"
+                    },
                     "thisReady":{
                         "timed":false,
                         "type":"NodeData"
@@ -180,6 +180,12 @@
                         "index":1,
                         "timed":false,
                         "type":"SensorData"
+                    },
+                    "shuffleRep":{
+                        "deadline":0,
+                        "index":9,
+                        "timed":false,
+                        "type":"ShuffleData"
                     }
                 },
                 "tims":{
@@ -192,6 +198,11 @@
                         "deadline":0,
                         "index":7,
                         "period":60000
+                    },
+                    "shuffle":{
+                        "deadline":0,
+                        "index":8,
+                        "period":10000
                     },
                     "update":{
                         "deadline":0,
@@ -366,6 +377,9 @@
         },
         {
             "name":"LogDataInternal"
+        },
+        {
+            "name":"ShuffleData"
         }
     ],
     "name":"GroupTestApp"

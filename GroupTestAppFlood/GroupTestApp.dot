@@ -1,0 +1,193 @@
+digraph GroupTestApp {
+rankdir=TB;
+nodesep="0.1";
+ranksep="1.5";
+orientation=l;
+subgraph msgs {
+rank=min;
+NodeData [shape=ellipse];
+GroupUpdateData [shape=ellipse];
+PeerDiscoveryData [shape=ellipse];
+LogData [shape=ellipse];
+}
+
+sensor_Sensor_151 -> SensorData_152;
+averager_Averager_153 -> NodeData;
+averager_Averager_153 -> LogData;
+SensorData_152 -> averager_Averager_153;
+NodeData -> averager_Averager_153;
+GroupUpdateData -> averager_Averager_153;
+PeerDiscoveryData -> averager_Averager_153;
+topmgr_TopologyManager_155 -> GroupUpdateData;
+topmgr_TopologyManager_155 -> PeerDiscoveryData;
+subgraph "cluster_10.42.0.116" {
+label="10.42.0.116";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_150 {
+rank=min;
+SensorData_152 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_149 {
+label=Averager;
+style=rounded;
+sensor_Sensor_151 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_153 [label="averager:Averager", rank=max, shape=component];
+}
+
+subgraph cluster_TopologyManager_154 {
+label=TopologyManager;
+style=rounded;
+topmgr_TopologyManager_155 [label="topmgr:TopologyManager", rank=max, shape=component];
+}
+
+}
+
+sensor_Sensor_158 -> SensorData_159;
+averager_Averager_160 -> NodeData;
+averager_Averager_160 -> LogData;
+SensorData_159 -> averager_Averager_160;
+NodeData -> averager_Averager_160;
+GroupUpdateData -> averager_Averager_160;
+PeerDiscoveryData -> averager_Averager_160;
+subgraph "cluster_10.42.0.118" {
+label="10.42.0.118";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_157 {
+rank=min;
+SensorData_159 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_156 {
+label=Averager;
+style=rounded;
+sensor_Sensor_158 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_160 [label="averager:Averager", rank=max, shape=component];
+}
+
+}
+
+sensor_Sensor_163 -> SensorData_164;
+averager_Averager_165 -> NodeData;
+averager_Averager_165 -> LogData;
+SensorData_164 -> averager_Averager_165;
+NodeData -> averager_Averager_165;
+GroupUpdateData -> averager_Averager_165;
+PeerDiscoveryData -> averager_Averager_165;
+subgraph "cluster_10.42.0.119" {
+label="10.42.0.119";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_162 {
+rank=min;
+SensorData_164 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_161 {
+label=Averager;
+style=rounded;
+sensor_Sensor_163 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_165 [label="averager:Averager", rank=max, shape=component];
+}
+
+}
+
+sensor_Sensor_168 -> SensorData_169;
+averager_Averager_170 -> NodeData;
+averager_Averager_170 -> LogData;
+SensorData_169 -> averager_Averager_170;
+NodeData -> averager_Averager_170;
+GroupUpdateData -> averager_Averager_170;
+PeerDiscoveryData -> averager_Averager_170;
+subgraph "cluster_10.42.0.120" {
+label="10.42.0.120";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_167 {
+rank=min;
+SensorData_169 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_166 {
+label=Averager;
+style=rounded;
+sensor_Sensor_168 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_170 [label="averager:Averager", rank=max, shape=component];
+}
+
+}
+
+sensor_Sensor_173 -> SensorData_174;
+averager_Averager_175 -> NodeData;
+averager_Averager_175 -> LogData;
+SensorData_174 -> averager_Averager_175;
+NodeData -> averager_Averager_175;
+GroupUpdateData -> averager_Averager_175;
+PeerDiscoveryData -> averager_Averager_175;
+subgraph "cluster_10.42.0.121" {
+label="10.42.0.121";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_172 {
+rank=min;
+SensorData_174 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_171 {
+label=Averager;
+style=rounded;
+sensor_Sensor_173 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_175 [label="averager:Averager", rank=max, shape=component];
+}
+
+}
+
+sensor_Sensor_178 -> SensorData_179;
+averager_Averager_180 -> NodeData;
+averager_Averager_180 -> LogData;
+SensorData_179 -> averager_Averager_180;
+NodeData -> averager_Averager_180;
+GroupUpdateData -> averager_Averager_180;
+PeerDiscoveryData -> averager_Averager_180;
+subgraph "cluster_10.42.0.123" {
+label="10.42.0.123";
+rankdir=BT;
+rank=max;
+subgraph Averager_msgs_177 {
+rank=min;
+SensorData_179 [label=SensorData, shape=ellipse];
+}
+
+subgraph cluster_Averager_176 {
+label=Averager;
+style=rounded;
+sensor_Sensor_178 [label="sensor:Sensor", rank=max, shape=component];
+averager_Averager_180 [label="averager:Averager", rank=max, shape=component];
+}
+
+}
+
+logger_Logger_183 -> LogDataInternal_184;
+LogData -> logger_Logger_183;
+LogDataInternal_184 -> writer_DataWriter_185;
+subgraph "cluster_10.42.0.113" {
+label="10.42.0.113";
+rankdir=BT;
+rank=max;
+subgraph DataLogger_msgs_182 {
+rank=min;
+LogDataInternal_184 [label=LogDataInternal, shape=ellipse];
+}
+
+subgraph cluster_DataLogger_181 {
+label=DataLogger;
+style=rounded;
+logger_Logger_183 [label="logger:Logger", rank=max, shape=component];
+writer_DataWriter_185 [label="writer:DataWriter", rank=max, shape=component];
+}
+
+}
+
+}

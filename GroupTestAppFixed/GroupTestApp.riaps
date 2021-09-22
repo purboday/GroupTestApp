@@ -5,6 +5,9 @@ app GroupTestApp {
     message NodeData;
     message GroupUpdateData;
     message PeerDiscoveryData;
+    message LogData;
+	message LogDataInternal;
+
 // begin:TopLinkMgrTemplate 
 message TopLinkGrpMsg ; 
 message TopLinkLeaderGrpMsg ; 
@@ -27,6 +30,8 @@ component Averager(Ts=1.0,iface='eth1',send_grp='grp_0',recv_grp='grp_0'){
       timer display 1000;
       sub discoverPeers : PeerDiscoveryData;
       sub groupUpdate : GroupUpdateData;
+      timer logUpdate 60 sec;
+      pub sendLog : LogData;
     }
     
     // TopologyManager Component
@@ -34,6 +39,16 @@ component TopologyManager{
 	timer trigger;
 	pub groupUpdate : GroupUpdateData;
 	pub discoverPeers : PeerDiscoveryData;
+	pub sendLog : LogData ;
+}
+
+device DataWriter(filename='LogData.csv', iface = 'eth1') {
+	sub writeLog : LogDataInternal ;
+}	
+component Logger(iface = 'eth1') {
+	sub getLog : LogData;
+	timer update 60 sec;
+	pub writeLog : LogDataInternal ;
 }
 
     // Averager actor
@@ -52,4 +67,12 @@ actor TopologyManager{
 		topmgr : TopologyManager;
 	}
 }
+
+actor DataLogger(filename='LogData.csv', iface='eth1') {
+    	local LogDataInternal;
+    	{
+    		logger : Logger(iface = iface) ;
+    		writer : DataWriter(filename = filename, iface = iface) ;
+    	}
+    }
 }
