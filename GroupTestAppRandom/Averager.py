@@ -29,7 +29,8 @@ class Averager(Component):
         self.id = None
         self.ip = None
         self.iface = iface
-        self.ipList = ['10.42.0.116','10.42.0.118','10.42.0.119','10.42.0.120','10.42.0.121','10.42.0.123']
+        #self.ipList = ['10.42.0.116','10.42.0.118','10.42.0.119','10.42.0.120','10.42.0.121','10.42.0.123']
+        self.ipList = ['192.168.57.1','192.168.57.2', '192.168.57.3', '192.168.57.4', '192.168.57.5', '192.168.57.6']
         self.currNbr = self.shuffleNbr(self.ipList,4)
         self.msgCount = 0
         self.bcast = 0
@@ -38,6 +39,7 @@ class Averager(Component):
         self.currView = self.shuffleNbr(self.currNbr,4)
         self.waiting = ''
         self.otherId = []
+        self.logger.info('self.iface %s' % (self.iface))
         
 # riaps:keep_handleactivate:begin
     def handleActivate(self):
@@ -56,6 +58,7 @@ class Averager(Component):
         self.logger.info("on_sensorReady():%s" % str(msg[1]))
         self.sensorTime, self.sensorValue = msg
         self.sensorUpdate = True
+        self.otherId = []
 
     def on_nodeReady(self):
         msg = self.nodeReady.recv_pyobj()  # Receive (actorID,timestamp,value)
@@ -100,11 +103,13 @@ class Averager(Component):
         rel = len(self.otherId)/len(self.ipList)
         self.logger.info('broadcast: %d, curr_val: %f, rel: %f' %(self.bcast, self.ownValue, rel))
         self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue, 'rel': rel})
+        self.logger.info('otherId: %s' %str(self.otherId))
         
     def on_shuffle(self):
         now = self.shuffle.recv_pyobj()
         if self.waiting != '':
             self.logger.info('suspected failure of %s' %(self.waiting))
+            self.otherId = []
             sourceList = [ip for ip in self.ipList if ip != self.waiting]
             self.currNbr = self.shuffleNbr(sourceList,4)
             temp_ageList = {}
@@ -167,8 +172,14 @@ class Averager(Component):
         sig = self.groupUpdate.recv_pyobj()
         self.logger.info('on group update')
         
+    def on_clearId(self):
+        msg=self.clearId.recv_pyobj()
+        self.otherId = []
+        
     def handlePeerStateChange(self,state,uuid):
         self.logger.info("peer %s is %s" % (uuid,state))
+        if state == 'down':
+            self.otherId = []
         
     def __destroy__(self):
         self.logger.info("terminated")

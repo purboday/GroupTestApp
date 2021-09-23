@@ -21,6 +21,10 @@
                         {
                             "name":"Ts",
                             "param":"Ts"
+                        },
+                        {
+                            "name":"iface",
+                            "param":"iface"
                         }
                     ],
                     "type":"Averager"
@@ -157,6 +161,12 @@
                 "reqs":{},
                 "srvs":{},
                 "subs":{
+                    "clearId":{
+                        "deadline":0,
+                        "index":10,
+                        "timed":false,
+                        "type":"RefreshData"
+                    },
                     "discoverPeers":{
                         "deadline":0,
                         "index":6,
@@ -297,6 +307,10 @@
                 "clts":{},
                 "inss":{},
                 "pubs":{
+                    "clearId":{
+                        "timed":false,
+                        "type":"RefreshData"
+                    },
                     "discoverPeers":{
                         "timed":false,
                         "type":"PeerDiscoveryData"
@@ -312,6 +326,11 @@
                 "srvs":{},
                 "subs":{},
                 "tims":{
+                    "refresh":{
+                        "deadline":0,
+                        "index":2,
+                        "period":10000
+                    },
                     "trigger":{
                         "deadline":0,
                         "index":1,
@@ -380,6 +399,9 @@
         },
         {
             "name":"ShuffleData"
+        },
+        {
+            "name":"RefreshData"
         }
     ],
     "name":"GroupTestApp"

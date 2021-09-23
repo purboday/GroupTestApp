@@ -5,3 +5,4 @@
  h4 xterm -T h4 -e  "$RIAPSMN"riaps-mn.node &
  h5 xterm -T h5 -e  "$RIAPSMN"riaps-mn.node &
  h6 xterm -T h6 -e  "$RIAPSMN"riaps-mn.node &
+ h7 xterm -T h7 -e  "$RIAPSMN"riaps-mn.node &

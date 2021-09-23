@@ -46,4 +46,8 @@ class TopologyManager(Component):
 
 # riaps:keep_impl:begin
 
+    def on_refresh(self):
+        now = self.refresh.recv_pyobj()
+        self.clearId.send_pyobj('clear')
+
 # riaps:keep_impl:end

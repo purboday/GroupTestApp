@@ -123,6 +123,10 @@ class Averager(Component):
     def on_groupUpdate(self):
         sig = self.groupUpdate.recv_pyobj()
         self.logger.info('on group update')
+        
+    def on_clearId(self):
+        msg=self.clearId.recv_pyobj()
+        self.otherId = []
                 
 
     def appAlgorithm(self, content):

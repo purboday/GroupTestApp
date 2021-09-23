@@ -2,47 +2,7 @@
   "GroupTestApp": [
     {
       "target": [
-        "192.168.57.1"
-      ],
-      "actors": [
-        {
-          "name": "Averager",
-          "actuals": [
-            {
-              "name": "value",
-              "value": "10.0"
-            },
-            {
-              "name": "iface",
-              "value": "h1-eth0"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "target": [
-        "192.168.57.2"
-      ],
-      "actors": [
-        {
-          "name": "Averager",
-          "actuals": [
-            {
-              "name": "value",
-              "value": "20.0"
-            },
-            {
-              "name": "iface",
-              "value": "h2-eth0"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "target": [
-        "192.168.57.3"
+        "10.42.0.111"
       ],
       "actors": [
         {
@@ -51,10 +11,6 @@
             {
               "name": "value",
               "value": "5.0"
-            },
-            {
-              "name": "iface",
-              "value": "h3-eth0"
             }
           ]
         }
@@ -62,7 +18,7 @@
     },
     {
       "target": [
-        "192.168.57.4"
+        "10.42.0.112"
       ],
       "actors": [
         {
@@ -70,11 +26,7 @@
           "actuals": [
             {
               "name": "value",
-              "value": "15.0"
-            },
-            {
-              "name": "iface",
-              "value": "h4-eth0"
+              "value": "0.0"
             }
           ]
         }
@@ -82,7 +34,7 @@
     },
     {
       "target": [
-        "192.168.57.5"
+        "10.42.0.113"
       ],
       "actors": [
         {
@@ -90,11 +42,7 @@
           "actuals": [
             {
               "name": "value",
-              "value": "5.0"
-            },
-            {
-              "name": "iface",
-              "value": "h5-eth0"
+              "value": "0.0"
             }
           ]
         }
@@ -102,7 +50,7 @@
     },
     {
       "target": [
-        "192.168.57.6"
+        "10.42.0.114"
       ],
       "actors": [
         {
@@ -110,11 +58,7 @@
           "actuals": [
             {
               "name": "value",
-              "value": "5.0"
-            },
-            {
-              "name": "iface",
-              "value": "h6-eth0"
+              "value": "0.0"
             }
           ]
         }
@@ -122,12 +66,113 @@
     },
     {
       "target": [
-        "192.168.57.1"
+        "10.42.0.116"
       ],
       "actors": [
         {
-          "name": "TopologyManager",
-          "actuals": []
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.118"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.119"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.120"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.121"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.122"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": [
+        "10.42.0.123"
+      ],
+      "actors": [
+        {
+          "name": "Averager",
+          "actuals": [
+            {
+              "name": "value",
+              "value": "0.0"
+            }
+          ]
         }
       ]
     }

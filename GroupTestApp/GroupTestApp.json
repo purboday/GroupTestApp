@@ -13,14 +13,6 @@
                 {
                     "default":"eth1",
                     "name":"iface"
-                },
-                {
-                    "default":"grp_0",
-                    "name":"send_grp"
-                },
-                {
-                    "default":"grp_0",
-                    "name":"recv_grp"
                 }
             ],
             "instances":{
@@ -29,18 +21,6 @@
                         {
                             "name":"Ts",
                             "param":"Ts"
-                        },
-                        {
-                            "name":"iface",
-                            "param":"iface"
-                        },
-                        {
-                            "name":"send_grp",
-                            "param":"send_grp"
-                        },
-                        {
-                            "name":"recv_grp",
-                            "param":"recv_grp"
                         }
                     ],
                     "type":"Averager"
@@ -59,6 +39,56 @@
             "locals":[
                 {
                     "type":"SensorData"
+                }
+            ],
+            "real-time":false,
+            "scheduler":{},
+            "usage":{
+                "cpu":{},
+                "mem":{},
+                "net":{},
+                "spc":{}
+            }
+        },
+        "DataLogger":{
+            "formals":[
+                {
+                    "default":"LogData.csv",
+                    "name":"filename"
+                },
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "instances":{
+                "logger":{
+                    "actuals":[
+                        {
+                            "name":"iface",
+                            "param":"iface"
+                        }
+                    ],
+                    "type":"Logger"
+                },
+                "writer":{
+                    "actuals":[
+                        {
+                            "name":"filename",
+                            "param":"filename"
+                        },
+                        {
+                            "name":"iface",
+                            "param":"iface"
+                        }
+                    ],
+                    "type":"DataWriter"
+                }
+            },
+            "internals":[],
+            "locals":[
+                {
+                    "type":"LogDataInternal"
                 }
             ],
             "real-time":false,
@@ -100,14 +130,6 @@
                 {
                     "default":"eth1",
                     "name":"iface"
-                },
-                {
-                    "default":"grp_0",
-                    "name":"send_grp"
-                },
-                {
-                    "default":"grp_0",
-                    "name":"recv_grp"
                 }
             ],
             "language":"default",
@@ -117,6 +139,14 @@
                 "clts":{},
                 "inss":{},
                 "pubs":{
+                    "sendLog":{
+                        "timed":false,
+                        "type":"LogData"
+                    },
+                    "shuffleReq":{
+                        "timed":false,
+                        "type":"ShuffleData"
+                    },
                     "thisReady":{
                         "timed":false,
                         "type":"NodeData"
@@ -129,13 +159,13 @@
                 "subs":{
                     "discoverPeers":{
                         "deadline":0,
-                        "index":5,
+                        "index":6,
                         "timed":false,
                         "type":"PeerDiscoveryData"
                     },
                     "groupUpdate":{
                         "deadline":0,
-                        "index":6,
+                        "index":5,
                         "timed":false,
                         "type":"GroupUpdateData"
                     },
@@ -150,6 +180,12 @@
                         "index":1,
                         "timed":false,
                         "type":"SensorData"
+                    },
+                    "shuffleRep":{
+                        "deadline":0,
+                        "index":9,
+                        "timed":false,
+                        "type":"ShuffleData"
                     }
                 },
                 "tims":{
@@ -158,10 +194,61 @@
                         "index":4,
                         "period":1000
                     },
+                    "logUpdate":{
+                        "deadline":0,
+                        "index":7,
+                        "period":60000
+                    },
+                    "shuffle":{
+                        "deadline":0,
+                        "index":8,
+                        "period":10000
+                    },
                     "update":{
                         "deadline":0,
                         "index":3,
                         "period":10
+                    }
+                }
+            },
+            "scheduler":"default"
+        },
+        "Logger":{
+            "formals":[
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "language":"default",
+            "name":"Logger",
+            "ports":{
+                "anss":{},
+                "clts":{},
+                "inss":{},
+                "pubs":{
+                    "writeLog":{
+                        "timed":false,
+                        "type":"LogDataInternal"
+                    }
+                },
+                "qrys":{},
+                "reps":{},
+                "reqs":{},
+                "srvs":{},
+                "subs":{
+                    "getLog":{
+                        "deadline":0,
+                        "index":1,
+                        "timed":false,
+                        "type":"LogData"
+                    }
+                },
+                "tims":{
+                    "update":{
+                        "deadline":0,
+                        "index":2,
+                        "period":60000
                     }
                 }
             },
@@ -235,21 +322,42 @@
             "scheduler":"default"
         }
     },
-    "devices":{},
-    "groups":[
-        {
-            "kind":"leader",
-            "message":"TopLinkGrpMsg",
-            "name":"TopLinkGrp",
-            "timed":false
-        },
-        {
-            "kind":"leader",
-            "message":"TopLinkLeaderGrpMsg",
-            "name":"TopLinkLeaderGrp",
-            "timed":false
+    "devices":{
+        "DataWriter":{
+            "formals":[
+                {
+                    "default":"LogData.csv",
+                    "name":"filename"
+                },
+                {
+                    "default":"eth1",
+                    "name":"iface"
+                }
+            ],
+            "language":"default",
+            "name":"DataWriter",
+            "ports":{
+                "anss":{},
+                "clts":{},
+                "inss":{},
+                "pubs":{},
+                "qrys":{},
+                "reps":{},
+                "reqs":{},
+                "srvs":{},
+                "subs":{
+                    "writeLog":{
+                        "deadline":0,
+                        "index":1,
+                        "timed":false,
+                        "type":"LogDataInternal"
+                    }
+                },
+                "tims":{}
+            }
         }
-    ],
+    },
+    "groups":[],
     "libraries":[],
     "messages":[
         {
@@ -265,10 +373,13 @@
             "name":"PeerDiscoveryData"
         },
         {
-            "name":"TopLinkGrpMsg"
+            "name":"LogData"
         },
         {
-            "name":"TopLinkLeaderGrpMsg"
+            "name":"LogDataInternal"
+        },
+        {
+            "name":"ShuffleData"
         }
     ],
     "name":"GroupTestApp"

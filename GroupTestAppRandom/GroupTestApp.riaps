@@ -8,6 +8,7 @@ app GroupTestApp {
     message LogData;
 	message LogDataInternal;
 	message ShuffleData;
+	message RefreshData;
 
 	// Sensor component
     component Sensor(value=1.0) {
@@ -29,6 +30,7 @@ component Averager(Ts=1.0,iface='eth1'){
       timer shuffle 10 sec;
       pub shuffleReq : ShuffleData;
       sub shuffleRep : ShuffleData;
+      sub clearId: RefreshData;
     }
     
     // TopologyManager Component
@@ -36,6 +38,8 @@ component TopologyManager{
 	timer trigger;
 	pub groupUpdate : GroupUpdateData;
 	pub discoverPeers : PeerDiscoveryData;
+	timer refresh 10000;
+	pub clearId : RefreshData;
 }
 
 device DataWriter(filename='LogData.csv', iface = 'eth1') {
@@ -52,7 +56,7 @@ actor Averager(value=0.0,Ts=100.0,iface='eth1'){
        local SensorData;					// Local message types
        { 
           sensor : Sensor(value=value);		
-		  averager : Averager(Ts=Ts);
+		  averager : Averager(Ts=Ts,iface=iface);
        }
 
     }

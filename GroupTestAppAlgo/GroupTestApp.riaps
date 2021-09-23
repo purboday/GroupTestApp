@@ -7,6 +7,7 @@ app GroupTestApp {
     message PeerDiscoveryData;
     message LogData;
 	message LogDataInternal;
+	message RefreshData;
 
 // begin:TopLinkMgrTemplate 
 message TopLinkGrpMsg ; 
@@ -32,6 +33,7 @@ component Averager(Ts=1.0,iface='eth1',send_grp='grp_0',recv_grp='grp_0'){
       sub groupUpdate : GroupUpdateData;
       timer logUpdate 60 sec;
       pub sendLog : LogData;
+      sub clearId: RefreshData;
     }
     
     // TopologyManager Component
@@ -39,6 +41,8 @@ component TopologyManager{
 	timer trigger;
 	pub groupUpdate : GroupUpdateData;
 	pub discoverPeers : PeerDiscoveryData;
+	timer refresh 10000;
+	pub clearId : RefreshData;
 }
 
 device DataWriter(filename='LogData.csv', iface = 'eth1') {

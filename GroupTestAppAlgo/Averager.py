@@ -272,6 +272,11 @@ class Averager(Component):
                     self.logger.info('[%s:%s] sending group update to %s' % (self.ip,now,node))
                     content = {'req': self.id, 'id' : node, 'length' : 0, 'grp': '', 'seq':[]}
                     self.joined[self.send_grp[0]].send_pyobj(('group_update', content))
+                    
+    def on_clearId(self):
+        if self.ready:
+            msg=self.clearId.recv_pyobj()
+            self.otherId = []
                 
 
     def appAlgorithm(self, content):
@@ -286,7 +291,7 @@ class Averager(Component):
     
     def handleGroupMessage(self, _group):
         msg = _group.recv_pyobj()
-        self.logger.info('received msg %s from group %s' %(msg,_group.getGroupName()))
+#         self.logger.info('received msg %s from group %s' %(msg,_group.getGroupName()))
         for gname, grp in self.joined.items():
             if grp == _group:
                 _group = gname

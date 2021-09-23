@@ -181,6 +181,12 @@
                 "reqs":{},
                 "srvs":{},
                 "subs":{
+                    "clearId":{
+                        "deadline":0,
+                        "index":8,
+                        "timed":false,
+                        "type":"RefreshData"
+                    },
                     "discoverPeers":{
                         "deadline":0,
                         "index":5,
@@ -310,6 +316,10 @@
                 "clts":{},
                 "inss":{},
                 "pubs":{
+                    "clearId":{
+                        "timed":false,
+                        "type":"RefreshData"
+                    },
                     "discoverPeers":{
                         "timed":false,
                         "type":"PeerDiscoveryData"
@@ -329,6 +339,11 @@
                 "srvs":{},
                 "subs":{},
                 "tims":{
+                    "refresh":{
+                        "deadline":0,
+                        "index":2,
+                        "period":10000
+                    },
                     "trigger":{
                         "deadline":0,
                         "index":1,
@@ -407,6 +422,9 @@
         },
         {
             "name":"LogDataInternal"
+        },
+        {
+            "name":"RefreshData"
         },
         {
             "name":"TopLinkGrpMsg"

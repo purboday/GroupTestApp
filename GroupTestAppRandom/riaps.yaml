@@ -1,15 +1,15 @@
 !!python/object:riaps.utils.appdesc.AppDescriptor
-home: /home/riaps/demonstrator/riaps/apps/GroupTestAppRandom
-host: '170524735'
+home: /home/riaps/GroupTestApp/GroupTestAppRandom
+host: '3232250113'
 hosts:
-- 10.42.0.116
-- 10.42.0.121
-- 10.42.0.119
-- 10.42.0.123
-- 10.42.0.118
-- 10.42.0.120
-- 10.42.0.113
-mac: 08002741da55
+- 192.168.57.2
+- 192.168.57.1
+- 192.168.57.5
+- 192.168.57.4
+- 192.168.57.7
+- 192.168.57.6
+- 192.168.57.3
+mac: 3a0d050378d7
 network: {}
-sha: 08002741da55
-url: file:////home/riaps/demonstrator/riaps/apps/GroupTestAppRandom
+sha: 3a0d050378d7
+url: file:////home/riaps/GroupTestApp/GroupTestAppRandom
