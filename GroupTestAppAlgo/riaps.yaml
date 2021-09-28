@@ -2,14 +2,14 @@
 home: /home/riaps/GroupTestApp/GroupTestAppAlgo
 host: '3232250113'
 hosts:
-- 192.168.57.7
 - 192.168.57.5
+- 192.168.57.6
+- 192.168.57.4
 - 192.168.57.2
 - 192.168.57.1
 - 192.168.57.3
-- 192.168.57.4
-- 192.168.57.6
-mac: 2afbeb6be6ed
+- 192.168.57.7
+mac: 46012208df79
 network: {}
-sha: 2afbeb6be6ed
+sha: 46012208df79
 url: file:////home/riaps/GroupTestApp/GroupTestAppAlgo

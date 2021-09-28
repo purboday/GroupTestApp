@@ -13,6 +13,7 @@ class TopologyManager(Component):
         super(TopologyManager, self).__init__()
         self.cmdFlag = False
         self.ready = False
+        self.start = True
 # riaps:keep_constr:end
 
 # riaps:keep_handleactivate:begin
@@ -30,17 +31,26 @@ class TopologyManager(Component):
         if not self.cmdFlag:
             self.cmdFlag = True
             self.logger.info('sending discover peers message')
-            self.discoverPeers.send_pyobj('start')
+            if self.start:
+                self.discoverPeers.send_pyobj('start')
+            else:
+                self.discoverPeers.send_pyobj('resume')
             self.trigger.setDelay(60.0)
             self.trigger.launch()
         elif self.ready:
             self.logger.info('sending ready message')
             self.groupUpdate.send_pyobj('ready')
+            self.cmdFlag = False
+            self.ready = False
+            self.trigger.setDelay(60.0)
+            self.trigger.launch()
         else:
             self.logger.info('sending group update message')
             self.groupUpdate.send_pyobj('start')
             self.trigger.setDelay(120.0)
-            self.ready = True
+            if self.start:
+                self.start = False
+                self.ready = True
             self.trigger.launch()
 # riaps:keep_trigger:end
 

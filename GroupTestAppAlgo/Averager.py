@@ -30,6 +30,9 @@ class Averager(Component):
         self.ready = False
         self.netStats = []
         self.otherId = []
+        self.suspect = False
+        self.waitJoin = False
+        self.checkGroups = []
 # riaps:keep_constr:end
 # riaps:keep_toplinkmgrinit:begin
         self.joined = {}
@@ -133,7 +136,7 @@ class Averager(Component):
         memberInfo = {}
         for grp in grpList:
             if grp in self.joined:
-                memberInfo[grp]['size'] = self.joined['grp'].groupSize()
+                memberInfo[grp] = self.joined[grp].groupSize()
         return min(memberInfo, key=memberInfo.get)
     
     def sendInfo(self, content):
@@ -211,6 +214,8 @@ class Averager(Component):
                 content['grp'] = self.send_grp[0]
                 content['size'] = self.joined[self.send_grp[0]].groupSize()
                 content['rep'] = self.id
+                if self.joined['leader_grp'].isLeader():
+                    content['curr_size'] = self.joined['leader_grp'].groupSize()
                 self.logger.info('[%s:%s] sending join response %s' % (self.ip,now,str(content)))
                 self.joined['leader_grp'].send_pyobj(('join_rep', content))
                 
@@ -219,37 +224,47 @@ class Averager(Component):
                 content['grp'] = min_group
                 content['size'] = self.joined[min_group].groupSize()
                 content['rep'] = self.id
+                if self.joined['leader_grp'].isLeader():
+                    content['curr_size'] = self.joined['leader_grp'].groupSize()
                 self.logger.info('[%s:%s] sending join response %s' % (self.ip,now,str(content)))
                 self.joined['leader_grp'].send_pyobj(('join_rep', content))
             
     def handleJoinRep(self, content):
-        if content['req'] == self.id:
-            now = self.curr_time()
-            self.logger.info('[%s:%s] received join response %s, groupSize %d' % (self.ip, now, str(content), self.joined['leader_grp'].groupSize()))
-            self.newGrp[content['rep']] = content
-            responses = {entry['grp']:entry['size'] for rep, entry in self.newGrp.items() if entry['grp_type'] == content['grp_type']}
-            if len(responses) == self.joined['leader_grp'].groupSize() - 2:
-                self.logger.info('[%s:%s] received all join responses' %(self.ip,now))
-                min_grp = min(responses, key=responses.get)
-                if content['grp_type'] == 'recv_grp':
-                    self.recv_grp.append(min_grp)
-                    self.logger.info('[%s:%s] joining group %s as %s' %(self.ip,now,min_grp,content['grp_type']))
-                    if min_grp not in self.joined:
-                        self.joined[min_grp]= self.joinGroup('TopLinkGrp', min_grp)
-                if content['grp_type'] == 'send_grp':
-                    self.send_grp = [min_grp]
-                    self.logger.info('[%s:%s] joining group %s as %s' %(self.ip,now,min_grp,content['grp_type']))
-                    if min_grp not in self.joined:
-                        self.joined[min_grp]= self.joinGroup('TopLinkGrp', min_grp)
-                self.graph[self.id]['order'] += 1
-                new_content = {'id' : self.id, 'length' : 0, 'grp' : min_grp, 'order': self.graph[self.id]['order']}
-                self.initDiscoReq.append(new_content)
-                delKeys = []
-                for req, content in self.newGrp.items():
-                    if content['grp'] in responses:
-                        delKeys.append(req)
-                for req in delKeys:
-                    self.newGrp.pop(req)
+        if self.waitJoin:
+            if content['req'] == self.id:
+                now = self.curr_time()
+                self.logger.info('[%s:%s] received join response %s, groupSize %d' % (self.ip, now, str(content), self.joined['leader_grp'].groupSize()))
+                self.newGrp[content['rep']] = content
+                responses = {entry['grp']:entry['size'] for rep, entry in self.newGrp.items() if entry['grp_type'] == content['grp_type']}
+                curr_size = self.joined['leader_grp'].groupSize()
+                for grp, item in self.newGrp.items():
+                    if 'curr_size' in item:
+                        if item['curr_size'] < curr_size:
+                            curr_size = item['curr_size']
+                
+                if len(responses) >= curr_size -3:
+                    self.waitJoin = False
+                    self.logger.info('[%s:%s] received all join responses' %(self.ip,now))
+                    min_grp = min(responses, key=responses.get)
+                    if content['grp_type'] == 'recv_grp':
+                        self.recv_grp.append(min_grp)
+                        self.logger.info('[%s:%s] joining group %s as %s' %(self.ip,now,min_grp,content['grp_type']))
+                        if min_grp not in self.joined:
+                            self.joined[min_grp]= self.joinGroup('TopLinkGrp', min_grp)
+                    if content['grp_type'] == 'send_grp':
+                        self.send_grp = [min_grp]
+                        self.logger.info('[%s:%s] joining group %s as %s' %(self.ip,now,min_grp,content['grp_type']))
+                        if min_grp not in self.joined:
+                            self.joined[min_grp]= self.joinGroup('TopLinkGrp', min_grp)
+                    self.graph[self.id]['order'] += 1
+                    new_content = {'id' : self.id, 'length' : 0, 'grp' : min_grp, 'order': self.graph[self.id]['order']}
+                    self.initDiscoReq.append(new_content)
+                    delKeys = []
+                    for req, content in self.newGrp.items():
+                        if content['grp'] in responses:
+                            delKeys.append(req)
+                    for req in delKeys:
+                        self.newGrp.pop(req)
        
     def on_discoverPeers(self):
         sig = self.discoverPeers.recv_pyobj()
@@ -258,6 +273,8 @@ class Averager(Component):
         self.graph[self.id]['order'] += 1
         content = {'id' : self.id, 'length' : 0, 'grp' : '', 'order': self.graph[self.id]['order']}
         self.sendInfo(content)
+        if sig == 'resume':
+            self.suspect = True
         
     def on_groupUpdate(self):
         sig = self.groupUpdate.recv_pyobj()
@@ -266,6 +283,40 @@ class Averager(Component):
             self.logger.info('ready')
         else:
             now = self.curr_time()
+            delKeys = []
+            '''if self.suspect:
+                stale = 0
+                count = 0
+                for gid, gcontent in self.graph.items():
+                    if gcontent['order'] < self.graph[self.id]['order']:
+                        delKeys.append(gid)
+                        if gcontent['length'] == 1:
+                            stale += 1
+                    else:
+                        count += 1
+                if count == 1:
+                    if not any(self.joined[group].isLeader() for group in self.recv_grp):
+                        content = {'req' : self.id, 'grp': gname, 'grp_type': 'send_grp'}
+                        if 'leader_grp' in self.joined:
+                            self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
+                            self.joined['leader_grp'].send_pyobj(('join_req', content))
+                            self.waitJoin = True
+                        else:
+                            self.joined['leader_grp']= self.joinGroup('TopLinkLeaderGrp','leader_grp')
+                            self.logger.info('[%s:%s] joining leader_grp' % (self.ip,now))
+                            self.initJoinReq.append(content)
+                if stale == self.joined[self.send_grp[0]].groupSize()-2:
+                    if not any(self.joined[group].isLeader() for group in self.send_grp):
+                        content = {'req' : self.id, 'grp': '', 'grp_type': 'recv_grp'} 
+                        if 'leader_grp' in self.joined:
+                            self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
+                            self.joined['leader_grp'].send_pyobj(('join_req', content))
+                            self.waitJoin = True
+                        else:
+                            self.joined['leader_grp']= self.joinGroup('TopLinkLeaderGrp','leader_grp')
+                            self.logger.info('[%s:%s] joining leader_grp' % (self.ip,now))
+                            self.initJoinReq.append(content)'''                             
+                      
             self.logger.info('[%s:%s] started group update' %(self.ip, now))
             for node, path_to_node in self.graph.items():
                 if path_to_node['length'] > self.thresh:
@@ -328,27 +379,27 @@ class Averager(Component):
                 
     def handleGrpAns(self, content):
         if content['grp'] in self.GrpAns:
-            if content['req'] not in self.GrpAns[content['grp']]:
-                self.GrpAns[content['grp']].append(content)
+            #if all(content['rep'] != item['rep'] for item in self.GrpAns[content['grp']]):
+            self.GrpAns[content['grp']].append(content)
         else:
             self.GrpAns[content['grp']]=[content]
         self.logger.info('Group size: %d, responses: %d' %(self.joined[content['grp']].groupSize(),len(self.GrpAns[content['grp']])))
-        
+        self.logger.info('self.recv_grp: %s , self.GrpAns.keys: %s' %(str(self.recv_grp),str(list(self.GrpAns.keys()))))
         if set(self.recv_grp) == set(list(self.GrpAns.keys())):
             grpAnsAll = True
             for grp, cont in self.GrpAns.items():
-                if any(item['req'] == self.id for item in cont):
-                    if len(self.GrpAns[grp])==self.joined[grp].groupSize()-2:
-                        self.logger.info('all group qry responses received for %s' %(grp))
-                        grpAnsAll = grpAnsAll and True
-                    else:
-                        grpAnsAll = grpAnsAll and False
+                #if any(item['req'] == self.id for item in cont):
+                if len(self.GrpAns[grp])>=self.GrpAns[grp][-1]['curr_size']-2:
+                    self.logger.info('all group qry responses received for %s' %(grp))
+                    grpAnsAll = grpAnsAll and True
                 else:
-                    if len(self.GrpAns[grp])==self.joined[grp].groupSize()-3:
+                    grpAnsAll = grpAnsAll and False
+                '''else:
+                    if len(self.GrpAns[grp])>=self.joined[grp].groupSize()-3:
                         self.logger.info('all group qry responses received for %s' %(grp))
                         grpAnsAll = grpAnsAll and True
                     else:
-                        grpAnsAll = grpAnsAll and False
+                        grpAnsAll = grpAnsAll and False'''
                         
             if grpAnsAll:
                     
@@ -358,6 +409,7 @@ class Averager(Component):
                     if 'leader_grp' in self.joined:
                         self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
                         self.joined['leader_grp'].send_pyobj(('join_req', content))
+                        self.waitJoin = True
                     else:
                         self.joined['leader_grp']= self.joinGroup('TopLinkLeaderGrp','leader_grp')
                         self.logger.info('[%s:%s] joining leader_grp' % (self.ip,now))
@@ -370,6 +422,34 @@ class Averager(Component):
                         delKeys.append(grp)
                 for key in delKeys:
                     self.GrpAns.pop(key)
+                    
+    def handleNodeFailures(self, group):
+        gname = group.getGroupName().split('.')[1]
+        now = self.curr_time()
+        if self.nic == 'up':
+            if gname in self.recv_grp:
+                self.logger.info('[%s:%s] sending group query to %s' %(self.ip,now,gname))
+                content = {'req' : self.id, 'grp': gname, 'grp_type': 'recv_grp', 'curr_size': group.groupSize()}
+                group.send_pyobj(('grp_qry',content))
+            else: 
+                if group.isLeader():
+                    comp_size = 2
+                else:
+                    comp_size = 3
+                proceed = False
+                if all(self.joined[gname].groupSize()<= comp_size for gname in self.send_grp):
+                    grp_type = 'send_grp'
+                    proceed = True
+                if proceed:
+                    content = {'req' : self.id, 'grp': '', 'grp_type': grp_type}
+                    if 'leader_grp' in self.joined:
+                        self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
+                        self.joined['leader_grp'].send_pyobj(('join_req', content))
+                        self.waitJoin = True
+                    else:
+                        self.joined['leader_grp']= self.joinGroup('TopLinkLeaderGrp','leader_grp')
+                        self.logger.info('[%s:%s] joining leader_grp' % (self.ip,now))
+                        self.initJoinReq.append(content)
             
                 
                 
@@ -378,26 +458,8 @@ class Averager(Component):
         gname = group.getGroupName().split('.')[1]
         if group.isLeader():
             self.logger.info('I am the leader!')
-        self.logger.info('[%s:%s] group member left group %s, size %d' % (self.ip,now, gname, group.groupSize()))
-        if self.nic == 'up':
-            if gname in self.recv_grp:
-                self.logger.info('[%s:%s] sending group query to %s' %(self.ip,now,gname))
-                content = {'req' : self.id, 'grp': gname, 'grp_type': 'send_grp'}
-                group.send_pyobj(('grp_qry',content))
-            elif group.groupSize() == 2:
-                proceed = False
-                if all(self.joined[gname].groupSize()== 2 for gname in self.send_grp):
-                    grp_type = 'recv_grp'
-                    proceed = True
-                if proceed:
-                    content = {'req' : self.id, 'grp': '', 'grp_type': grp_type}
-                    if 'leader_grp' in self.joined:
-                        self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
-                        self.joined['leader_grp'].send_pyobj(('join_req', content))
-                    else:
-                        self.joined['leader_grp']= self.joinGroup('TopLinkLeaderGrp','leader_grp')
-                        self.logger.info('[%s:%s] joining leader_grp' % (self.ip,now))
-                        self.initJoinReq.append(content)
+            self.logger.info('[%s:%s] group member left group %s, size %d' % (self.ip,now, gname, group.groupSize()))
+            self.handleNodeFailures(group)
 
                 
     def handleMemberJoined(self, group, memberId):
@@ -408,7 +470,8 @@ class Averager(Component):
                 for content in self.initJoinReq:
                     self.logger.info(str(content))
                     self.logger.info('[%s:%s send join request to leader_grp %s]' %(self.ip,now,str(content)))
-                    self.joined['leader_grp'].send_pyobj(('join_req', content))   
+                    self.joined['leader_grp'].send_pyobj(('join_req', content))
+                    self.waitJoin = True   
                 self.initJoinReq= []
                 
     
@@ -432,9 +495,24 @@ class Averager(Component):
             if 'leader_grp' not in self.joined:
                 self.joined['leader_grp'] = self.joinGroup('TopLinkLeaderGrp','leader_grp')
                 self.logger.info('joined group leader_grp')
+            gname = group.getGroupName().split('.')[1]
+            
+            if gname in self.checkGroups:
+                pass
+                self.handleNodeFailures(group)
                 
     def handleNICStateChange(self, state):
         self.nic = state
         self.logger.info('nic state changed %s' %(state))
+        
+    def handleLeaderExited(self, group, leaderId):
+        self.logger.info('leader exited %s, size: %s' %(group.getGroupName(),group.groupSize()))
+        gname = group.getGroupName().split('.')[1]
+        if gname != 'leader_grp':
+            if group.groupSize() <= 3:
+                self.handleNodeFailures(group)
+            else:
+                pass
+                #self.checkGroups.append(gname)
 
 # riaps:keep_impl:end
