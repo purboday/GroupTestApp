@@ -16,6 +16,6 @@ on (192.168.57.4) Averager(value = 5.0,Ts = 100.0,iface='h4-eth0',send_grp = "gr
 
 on (192.168.57.1) TopologyManager ;
 
-on (192.168.57.7) DataLogger(filename='/home/riaps/GTAlgoFT3.csv', iface='h7-eth0');
+on (192.168.57.7) DataLogger(filename='/home/riaps/GTAlgonw.csv', iface='h7-eth0');
 
 }

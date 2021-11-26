@@ -8,6 +8,7 @@ import netifaces
 from datetime import datetime
 import uuid
 import os
+import sys
 
 
 # riaps:keep_import:end
@@ -49,6 +50,10 @@ class Averager(Component):
         self.newGrp = {}
         self.GrpAns = {}
         self.nic = 'up'
+        self.msgCount = 0
+        self.tp = 0
+        self.lat = 0
+        self.start = time.time()
 # riaps:keep_toplinkmgrinit:end
 	
 
@@ -91,6 +96,7 @@ class Averager(Component):
         if self.ready:
             rel = len(self.otherId)/6
             self.logger.info('broadcast: %d, curr_val: %f, rel: %f' %(self.bcast, self.ownValue, rel))
+            lat = self.lat/self.msgCount
             self.netStats.append({'ip': self.ip, 'round': self.bcast, 'value': self.ownValue, 'rel': rel})
 # riaps:keep_display:end
 
@@ -129,7 +135,7 @@ class Averager(Component):
 
     def curr_time(self):
         current_time = datetime.now()
-        dt_string = current_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        dt_string = current_time.strftime("%Y-%m-%d %H:%M:%S.%f")
         return dt_string
 
     def findMinGrp(self, grpList):
@@ -339,6 +345,9 @@ class Averager(Component):
             for nodeId in otherRoute:
                 if nodeId not in self.otherId:
                     self.otherId.append(nodeId)
+            self.msgCount += 1
+            self.tp += sys.getsizeof(content)
+            self.lat += time.time() - otherTimestamp
     
     def handleGroupMessage(self, _group):
         msg = _group.recv_pyobj()

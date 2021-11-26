@@ -6,5 +6,5 @@ app GroupTestApp {
 	on (192.168.57.5) Averager(value=5.0, Ts=100, iface='h5-eth0');
 	on (192.168.57.6) Averager(value=5.0,Ts=100, iface='h6-eth0');
 	on (192.168.57.1) TopologyManager;
-	on (192.168.57.7) DataLogger(filename='/home/riaps/GTRandomFT2.csv', iface='h7-eth0');
+	on (192.168.57.7) DataLogger(filename='/home/riaps/GTRandomtpl.csv', iface='h7-eth0');
 }
